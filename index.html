@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("bak.jpg");
+        }
+        .quiz-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .question {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .answers {
+            list-style: none;
+            padding: 0;
+        }
+        .answers li {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="quiz">
+            <div class="quiz-header">
+                <h2 id="question">Question text</h2>
+                <ul class="answers" id="answers">
+                    <!-- Options will be dynamically inserted here -->
+                </ul>
+            </div>
+            <button id="next">Suivant</button>
+        </div>
+        <div id="results" class="results" style="display: none;">
+            <h2>Results</h2>
+            <p id="score">Your score: 0/0</p>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Quel est l'ordre correct des balises HTML pour structurer un document de base ?",
+                options: [ "&lt;head&gt; &lt;html&gt; &lt;body&gt;",
+            "&lt;html&gt; &lt;head&gt; &lt;body&gt;",
+            "&lt;html&gt; &lt;body&gt; &lt;head&gt;"],
+                correct: 1
+            },
+            {
+                question: "Quelle propriété CSS est utilisée pour changer la couleur du texte ?",
+                options: ["font-color", "text-color", "color"],
+                correct: 2
+            },
+            {
+                question: "Quelle méthode JavaScript est utilisée pour afficher un message dans la console ?",
+                options: ["console.log()", "alert()", "document.write()"],
+                correct: 0
+            },
+    {
+        question: "Quelle balise HTML est utilisée pour insérer une image ?",
+        options: ["&lt;img&gt;", "&lt;image&gt;", "&lt;picture&gt;"],
+        correct: 0
+    },
+    {
+        question: "Quelle méthode JavaScript est utilisée pour ajouter un élément à la fin d'un tableau ?",
+        options: ["push()", "pop()", "append()"],
+        correct: 0
+    },
+    {
+        question: "Quelle balise HTML est utilisée pour créer un lien hypertexte ?",
+        options: ["&lt;a&gt;", "&lt;link&gt;", "&lt;href&gt;"],
+        correct: 0
+    },
+    {
+        question: "Quelle propriété CSS est utilisée pour changer la taille de la police ?",
+        options: ["font-style", "font-size", "text-size"],
+        correct: 1
+    },
+    {
+        question: "Quelle méthode JavaScript est utilisée pour convertir une chaîne en majuscules ?",
+        options: ["toUpperCase()", "toLowerCase()", "toCapitalize()"],
+        correct: 0
+    },
+    {
+        question: "Quelle balise HTML est utilisée pour créer une liste à puces ?",
+        options: ["&lt;ul&gt;", "&lt;ol&gt;", "&lt;li&gt;"],
+        correct: 0
+    },
+    {
+        question: "Quel est l'attribut HTML utilisé pour spécifier une valeur unique pour un élément ?",
+        options: ["class", "id", "style"],
+        correct: 1
+    },
+    {
+        question: "Quelle propriété CSS est utilisée pour ajouter un espace interne autour d'un élément ?",
+        options: ["margin", "padding", "border"],
+        correct: 1
+    },
+    {
+        question: "Quel événement JavaScript est déclenché lorsqu'un utilisateur clique sur un élément ?",
+        options: ["onclick", "onhover", "onpress"],
+        correct: 0
+    },
+    {
+        question: "Quelle méthode JavaScript est utilisée pour supprimer le dernier élément d'un tableau ?",
+        options: ["remove()", "delete()", "pop()"],
+        correct: 2
+    },
+    {
+        question: "Quel attribut HTML est utilisé pour définir le texte alternatif d'une image ?",
+        options: ["alt", "title", "src"],
+        correct: 0
+    },
+    {
+        question: "Quelle propriété CSS est utilisée pour aligner un texte au centre ?",
+        options: ["text-align", "align-text", "text-center"],
+        correct: 0
+    },
+    {
+        question: "Quelle méthode JavaScript est utilisée pour afficher une boîte de dialogue avec un message et un champ de saisie ?",
+        options: ["alert()", "confirm()", "prompt()"],
+        correct: 2
+    },
+    {
+        question: "Quelle balise HTML est utilisée pour insérer une ligne horizontale ?",
+        options: ["<hr>", "<line>", "<br>"],
+        correct: 0
+    },
+    {
+        question: "Quelle méthode JavaScript est utilisée pour joindre tous les éléments d'un tableau en une seule chaîne ?",
+        options: ["join()", "concat()", "toString()"],
+        correct: 0
+    },
+    {
+        question: "Quelle propriété CSS est utilisée pour définir l'arrière-plan d'un élément ?",
+        options: ["background-color", "background", "bg-color"],
+        correct: 1
+    },
+    {
+        question: "Quel type d'entrée HTML est utilisé pour permettre à un utilisateur de sélectionner plusieurs options ?",
+        options: ["<select multiple>", "<checkbox>", "<multi-select>"],
+        correct: 1
+    }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const questionEl = document.getElementById("question");
+        const answersEl = document.getElementById("answers");
+        const nextButton = document.getElementById("next");
+        const resultsEl = document.getElementById("results");
+        const scoreEl = document.getElementById("score");
+
+        function loadQuestion() {
+            const currentQuiz = quizData[currentQuestion];
+            questionEl.innerText = `Question ${currentQuestion + 1} sur ${quizData.length}: ${currentQuiz.question}`;
+            answersEl.innerHTML = "";
+
+            currentQuiz.options.forEach((option, index) => {
+                const li = document.createElement("li");
+                li.innerHTML = `<label><input type="radio" name="answer" value="${index}"> ${option}</label>`;
+                answersEl.appendChild(li);
+            });
+        }
+
+        function showResults() {
+            quiz.style.display = "none";
+            resultsEl.style.display = "block";
+            scoreEl.innerText = `Your score: ${score}/${quizData.length}`;
+        }
+
+        nextButton.addEventListener("click", () => {
+            const answer = document.querySelector("input[name='answer']:checked");
+
+            if (!answer) {
+                alert("Veuillez sélectionner une réponse avant de continuer.");
+                return;
+            }
+
+            if (parseInt(answer.value) === quizData[currentQuestion].correct) {
+                score++;
+            }
+
+            currentQuestion++;
+
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        loadQuestion();
+    </script>
+</body>
+</html>
